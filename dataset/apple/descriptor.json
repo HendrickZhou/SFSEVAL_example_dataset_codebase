@@ -1,0 +1,20 @@
+[{
+    "image":{
+        "img": "shading.png",
+        "mask": "depth_valid.png",
+        "pose": null
+    },
+    "intrinsic":{
+        "type":null,
+        "path":null
+    },
+    "ground_truth":{
+        "type":"mat",
+        "path":"Z.mat"
+    },
+    "shape_prior": {
+        "type":null,
+        "path":null
+    },
+    "light":"L.mat"
+}]

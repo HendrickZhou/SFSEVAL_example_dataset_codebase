@@ -1,0 +1,22 @@
+[
+{
+    "image": {
+        "img": "dino0023.png",
+        "mask": null,
+        "pose": "23pose.txt"
+    },
+    "intrinsic": {
+        "type":"mat",
+        "path":"23intrinsic.mat"
+    },
+    "ground_truth": {
+        "type": null,
+        "path": null
+    },
+    "shape_prior": {
+        "type": null,
+        "path": null
+    },
+    "light": null
+}
+]

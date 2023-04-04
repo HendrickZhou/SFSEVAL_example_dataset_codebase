@@ -1,0 +1,42 @@
+[
+{
+    "image": {
+        "img": "frame-000040.color.png",
+        "mask": "frame-000040.mask.png",
+        "pose": "frame-000040.pose.mat"
+    },
+    "intrinsic": {
+        "type":"mat",
+        "path":"colorIntrinsics.mat"
+    },
+    "ground_truth": {
+        "type": null,
+        "path": null
+    },
+    "shape_prior": {
+        "type": "png",
+        "path": "frame-000040.depth.png"
+    },
+    "light": null
+},
+{
+    "image": {
+        "img": "frame-000041.color.png",
+        "mask": null,
+        "pose": "frame-000041.pose.txt"
+    },
+    "intrinsic": {
+        "type":"txt",
+        "path":"colorIntrinsics.txt"
+    },
+    "ground_truth": {
+        "type": null,
+        "path": null
+    },
+    "shape_prior": {
+        "type": "png",
+        "path": "frame-000041.depth.png"
+    },
+    "light": null
+}
+]

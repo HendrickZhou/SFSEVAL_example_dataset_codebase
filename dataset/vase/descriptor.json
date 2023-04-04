@@ -1,0 +1,22 @@
+[
+    {
+        "image": {
+            "img": "vase.png",
+            "mask": "vase_mask.png",
+            "pose": null
+        },
+        "intrinsic": {
+            "type": "mat",
+            "path": "vase_K.mat"
+        },
+        "ground_truth": {
+            "type": null,
+            "path": null
+        },
+        "shape_prior": {
+            "type": "mat",
+            "path": "vase_depth"
+        },
+        "light": null
+    }
+]

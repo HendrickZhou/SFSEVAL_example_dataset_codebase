@@ -1,0 +1,155 @@
+/******************************************************************************/
+/*  This is the multigrid implementation for Lee and Kuo's shape from shading */
+/*  algorithm, which includes the smoothness constraint.                      */
+/******************************************************************************/
+
+#include <stdio.h>
+#include <math.h>
+#include <ImageTools.h>
+#include "DEF.h"
+#include "nrutil.h"
+
+extern double Ei[ARRAY_SIZE][ARRAY_SIZE];	/* intensity         */
+int nGrid;
+double C[MaxGrids][ARRAY_SQ][13];		/* stiffness matrix  */
+double Sx, Sy, Sz;
+
+int IMG_SIZE;
+int i_cntr;
+
+main()
+{
+    int i, h, size;
+    double *b, *Z, len;
+    int nIter, nVcycle;
+    FILE *outf;
+    char filename[80];
+
+    readimg();
+
+    fprintf(stderr, "Sx = ");
+    scanf("%lf", &Sx);
+    fprintf(stderr, "Sy = ");
+    scanf("%lf", &Sy);
+    fprintf(stderr, "Sz = ");
+    scanf("%lf", &Sz);
+    len = sqrt(Sx*Sx + Sy*Sy + Sz*Sz);
+    Sx /= len;
+    Sy /= len;
+    Sz /= len;
+
+    fprintf(stderr, "Number of multigrid iteration = ");
+    scanf("%d", &nIter);
+
+    fprintf(stderr, "Number of grids = ");
+    scanf("%d", &nGrid);
+
+    h = 1;
+
+    allocate(&b, IMG_SIZE*IMG_SIZE);
+    allocate(&Z, IMG_SIZE*IMG_SIZE);
+
+    /* Number of multigrids to run */
+    for (i_cntr = 0; i_cntr < nIter; i_cntr++) {
+	if (i_cntr == 0)
+	    nVcycle = 10;
+	else if (i_cntr == 1)
+	    nVcycle = 2;
+        else
+	    nVcycle = 1;
+
+        for (i = 0; i < nGrid; i++) {
+	    size = IMG_SIZE / (1 << i);
+	    calc_C_b(Z, size, i+1, b);
+        }
+
+	/* Number of V-cycles in each multigrid */
+	for (i = 0; i < nVcycle; i++) {	
+	    recursive(h, b, &Z);
+        }
+    }   /* for i_cntr */
+
+    free(b);
+}
+
+
+
+recursive(h, rhs, Z)
+    int h;
+    double *rhs, **Z;
+{
+    int size, k;
+    double *fresid, *cresid;
+    double *dZ;
+
+    size = IMG_SIZE / (1 << (h-1));
+
+    if (h == nGrid) {			/* the coarsest grid */
+	exact(h, rhs, *Z, size);
+	return;
+    }
+
+    relax(h, rhs, *Z, size);		/* presmoothing */
+
+    allocate(&fresid, size*size);	/* allocate space and init to zeros */
+    allocate(&cresid, size*size/4);	/* allocate space and init to zeros */
+    residual(h, *Z, rhs, fresid);	/* compute the residual */
+    restrict(cresid, fresid, size/2);
+    free(fresid);
+    allocate(&dZ, size*size/4);
+    recursive(h+1, cresid, &dZ);
+    free(cresid);
+    interpolate(*Z, dZ, size);
+
+    relax(h, rhs, *Z, size);		/* postsmoothing */
+
+    free(dZ);				/* deallocate space */
+}
+
+
+
+
+exact(h, rhs, Z, size)
+    int h, size;
+    double *rhs, *Z;
+{
+    int i;
+    double resid[16];
+
+    for (i = 0;  i < size*size;  i++) {
+       resid[i] = 0.0;
+       if (Z[i] != 0.0) {
+	   printf("Z[%d] = %lf\n", i, Z[i]);
+	}
+    }
+
+    GSI2(h-1, rhs, Z, size);
+}
+
+
+
+
+relax(h, rhs, Z, size)
+    int h, size;
+    double *rhs, *Z;
+{
+    GSI(h-1, rhs, Z, size);
+}
+
+
+
+allocate(ptr, size)
+    double **ptr;
+    int size;
+{
+    int i;
+
+    if ( (*ptr = (double *)calloc(size, sizeof(double))) == NULL) {
+        fprintf(stderr, "Out of memory in allocate.\n");
+        exit(1);
+    }
+
+    for (i = 0; i < size; i++) {
+	(*ptr)[i] = 0.0;
+    }
+}
